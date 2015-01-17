@@ -29,42 +29,45 @@ public class Main {
 
 		InstanceConverter converter = new InstanceConverter();
 		Trainingset<Integer> newT = converter.convertStringToInteger(t);
-
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
 		String kString = null;
 
-		try {
-			System.out.print("Enter k: ");
-			kString = br.readLine();
-		} catch (IOException e) {
-			System.err.println("InputError occured");
-			return;
-		}
+//		try {
+//			System.out.print("Enter k: ");
+//			kString = br.readLine();
+//		} catch (IOException e) {
+//			System.err.println("InputError occured");
+//			return;
+//		}
+		kString = "3";
 		
-		Trainingset<Integer> testSet = null;
-		Validator v = null;
-		double mean = 0;
+		YUSoMean classifier = new YUSoMean(Integer.valueOf(kString));
+		classifier.learn(newT);
 		
-		for (int i = 0; i < 100; i++) {
-			YUSoMean classifier = new YUSoMean(Integer.valueOf(kString));
-
-			testSet = newT.splitUpTestSet(33);
-
-			classifier.learn();
-
-			v = new Validator(classifier);
-			
-			mean += v.validateOnTestSet(testSet);
-			
-			newT = converter.convertStringToInteger(t);
-		}
-		System.out.println("Mean error over 100 samples: "
-				+ (1-(mean/100.0)));
-
-		int[][] confusion = v.computeConfusionMatrix(testSet);
-
-		printConfusion(confusion, testSet.getClasses());
+//		Trainingset<Integer> testSet = null;
+//		Validator v = null;
+//		double mean = 0;
+//		
+//		for (int i = 0; i < 100; i++) {
+//			YUSoMean classifier = new YUSoMean(Integer.valueOf(kString));
+//
+//			testSet = newT.splitUpTestSet(33);
+//
+//			classifier.learn(newT);
+//
+//			v = new Validator(classifier);
+//			
+//			mean += v.validateOnTestSet(testSet);
+//			
+//			newT = converter.convertStringToInteger(t);
+//		}
+//		System.out.println("Mean error over 100 samples: "
+//				+ (1-(mean/100.0)));
+//
+//		int[][] confusion = v.computeConfusionMatrix(testSet);
+//
+//		printConfusion(confusion, testSet.getClasses());
 
 	}
 
