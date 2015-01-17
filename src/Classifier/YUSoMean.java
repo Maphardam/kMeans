@@ -10,16 +10,16 @@ public class YUSoMean implements IClassifier{
 
 	private int k;
 	//TODO maybe there is a way to store centroids as an array, not an arraylist
-	private ArrayList<Instance<Integer>> centroids;
+	private ArrayList<Instance<Double>> centroids;
 	
 	public YUSoMean(){
 		k = 3;
-		centroids = new ArrayList<Instance<Integer>>();
+		centroids = new ArrayList<Instance<Double>>();
 	}
 	
 	public YUSoMean(int _k){
 		k = _k;
-		centroids = new ArrayList<Instance<Integer>>();
+		centroids = new ArrayList<Instance<Double>>();
 	}
 	
 	@Override
@@ -30,60 +30,81 @@ public class YUSoMean implements IClassifier{
 	
 	public void learn(Trainingset<Integer> t){
 		initializeCentroids(t);
-		int[] oldClassification = new int[t.size()];
-		int[] newClassification = new int[t.size()];
+		
+		//TODO maybe we can use the Trainingset classes attribute to store the classification information
+		Integer[] oldClassification = new Integer[t.size()];
+		Integer[] newClassification = new Integer[t.size()];
 		
 		// while kMeans has not converged, do this
-		do {
+		int x = 0;
+		do {			
 			oldClassification = newClassification.clone();
-			newClassification = new int[t.size()];
+			newClassification = new Integer[t.size()];
+			
+			System.out.println("Centroids: " + centroids);
+			System.out.println("Classification: " + Arrays.toString(oldClassification));
+			System.out.println(x);
 			
 			// iterate over all instances in the given trainingset
-			for (int i = 0; i < t.size(); i++) {
-				Instance<Integer> instance = t.getInstance(i);
+			for (int iIndex = 0; iIndex < t.size(); iIndex++) {
+				Instance<Integer> instance = t.getInstance(iIndex);
 
 				// compute distance to centroids
-				int minDistance = Integer.MAX_VALUE;
+				double minDistance = Double.MAX_VALUE;
 				int minCentroidIndex = -1;
 				for (int cIndex = 0; cIndex < centroids.size(); cIndex++) {
-					int dist = distance(instance, centroids.get(cIndex));
+					double dist = distance(centroids.get(cIndex), instance);
 					if (dist < minDistance) {
 						minDistance = dist;
 						minCentroidIndex = cIndex;
 					}
 				}
-				newClassification[i] = minCentroidIndex;
+				newClassification[iIndex] = minCentroidIndex;
 			}
 			
 			// compute new centroids
-			centroids = new ArrayList<Instance<Integer>>();
-			for (int i = 0; i < k; i++) {
-				ArrayList<Integer> features = new ArrayList<Integer>();
-				for (int fIndex = 0; fIndex < t.getFeatureCount(); fIndex++){
-					
+			centroids = new ArrayList<Instance<Double>>();
+			
+			for (int cIndex = 0; cIndex < k; cIndex++) {
+				
+				//get the indexes of elements assigned to class i
+				ArrayList<Integer> indexes = new ArrayList<Integer>();
+				for (int iIndex = 0; iIndex < t.size(); iIndex++){
+					if (newClassification[iIndex] == cIndex)
+						indexes.add(iIndex);
 				}
+				//compute the new value
+				ArrayList<Double> features = new ArrayList<Double>();				
+				for (int fIndex = 0; fIndex < t.getFeatureCount(); fIndex++){
+					int featureSum = 0;
+					for (int iocIndex = 0; iocIndex < indexes.size(); iocIndex++)
+						featureSum += t.getInstance(iocIndex).getFeature(fIndex);
+					features.add(((double) featureSum / (double) indexes.size()));
+				}
+				centroids.add(new Instance<Double>(features, "-"));
 			}
-		} while (!Arrays.equals(oldClassification, newClassification));
+			x++;
+		} while (x < 10 && !Arrays.equals(oldClassification, newClassification));
 	}
 
 	private void initializeCentroids(Trainingset<Integer> t){
 		for (int i = 0; i < k; i++) {
-			ArrayList<Integer> features = new ArrayList<Integer>();
+			ArrayList<Double> features = new ArrayList<Double>();
 			Random rand = new Random();
 			for (int fIndex = 0; fIndex < t.getFeatureCount(); fIndex++){
 				// compute a random feature value in between the feature space given by the trainingset
 				List<Integer> list = Arrays.asList(t.getDomain(fIndex).values);
-				features.add(rand.nextInt((Collections.max(list) - Collections.min(list) + 1) + Collections.min(list)));
+				features.add((double) rand.nextInt((Collections.max(list) - Collections.min(list) + 1) + Collections.min(list)));
 			}
-			centroids.add(new Instance<Integer>(features, "-"));
+			centroids.add(new Instance<Double>(features, "-"));
 		}
 	}
 	
-	private int distance(Instance<Integer> i, Instance<Integer> j){
+	private double distance(Instance<Double> centroid, Instance<Integer> i){
 		
 		int distance = 0;
-		for (int m = 0; m < i.getDimension(); m++) {
-			distance += Math.abs(i.getFeature(m) - j.getFeature(m));
+		for (int m = 0; m < centroid.getDimension(); m++) {
+			distance += Math.abs(centroid.getFeature(m) - i.getFeature(m));
 		}
 		
 		return distance;
