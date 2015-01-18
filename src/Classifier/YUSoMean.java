@@ -31,19 +31,19 @@ public class YUSoMean implements IClassifier{
 	public void learn(Trainingset<Integer> t){
 		initializeCentroids(t);
 		
-		//TODO maybe we can use the Trainingset classes attribute to store the classification information
+//		System.out.println("Instances: ");
+//		for (int i = 0; i < t.size(); i++)
+//			System.out.println(i+ " " + t.getInstance(i));
+		
 		Integer[] oldClassification = new Integer[t.size()];
 		Integer[] newClassification = new Integer[t.size()];
 		
 		// while kMeans has not converged, do this
-		int x = 0;
 		do {			
 			oldClassification = newClassification.clone();
 			newClassification = new Integer[t.size()];
 			
-			System.out.println("Centroids: " + centroids);
-			System.out.println("Classification: " + Arrays.toString(oldClassification));
-			System.out.println(x);
+			//System.out.println("Centroids: " + centroids);
 			
 			// iterate over all instances in the given trainingset
 			for (int iIndex = 0; iIndex < t.size(); iIndex++) {
@@ -73,18 +73,20 @@ public class YUSoMean implements IClassifier{
 					if (newClassification[iIndex] == cIndex)
 						indexes.add(iIndex);
 				}
+				//System.out.println("Assigned instances to centroid " + cIndex + ": " + indexes);
 				//compute the new value
 				ArrayList<Double> features = new ArrayList<Double>();				
 				for (int fIndex = 0; fIndex < t.getFeatureCount(); fIndex++){
 					int featureSum = 0;
-					for (int iocIndex = 0; iocIndex < indexes.size(); iocIndex++)
+					for (int iocIndex : indexes)
 						featureSum += t.getInstance(iocIndex).getFeature(fIndex);
-					features.add(((double) featureSum / (double) indexes.size()));
+					features.add(((double) featureSum / indexes.size()));
 				}
 				centroids.add(new Instance<Double>(features, "-"));
 			}
-			x++;
-		} while (x < 10 && !Arrays.equals(oldClassification, newClassification));
+			
+			//System.out.println("Classification: " + Arrays.toString(newClassification));
+		} while (!Arrays.equals(oldClassification, newClassification));
 	}
 
 	private void initializeCentroids(Trainingset<Integer> t){
@@ -101,12 +103,10 @@ public class YUSoMean implements IClassifier{
 	}
 	
 	private double distance(Instance<Double> centroid, Instance<Integer> i){
-		
 		int distance = 0;
 		for (int m = 0; m < centroid.getDimension(); m++) {
 			distance += Math.abs(centroid.getFeature(m) - i.getFeature(m));
 		}
-		
 		return distance;
 	}
 }
