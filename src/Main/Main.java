@@ -17,6 +17,9 @@ public class Main {
 
 	public static void main(String[] args) {
 		
+		Integer[] a = new Integer[2];
+		a[0] = new Integer(3);
+		
 		InstanceReader input = new InstanceReader("./car.data");
 		Trainingset<String> t = input.readInstances();
 
@@ -33,41 +36,37 @@ public class Main {
 
 		String kString = null;
 
-//		try {
-//			System.out.print("Enter k: ");
-//			kString = br.readLine();
-//		} catch (IOException e) {
-//			System.err.println("InputError occured");
-//			return;
-//		}
-		kString = "3";
-		Trainingset<Integer> testSet = newT.splitUpTestSet(99);
-		YUSoMean classifier = new YUSoMean(Integer.valueOf(kString));
-		classifier.learn(newT);
+		try {
+			System.out.print("Enter k: ");
+			kString = br.readLine();
+		} catch (IOException e) {
+			System.err.println("InputError occured");
+			return;
+		}
 		
-//		Trainingset<Integer> testSet = null;
-//		Validator v = null;
-//		double mean = 0;
-//		
-//		for (int i = 0; i < 100; i++) {
-//			YUSoMean classifier = new YUSoMean(Integer.valueOf(kString));
-//
-//			testSet = newT.splitUpTestSet(33);
-//
-//			classifier.learn(newT);
-//
-//			v = new Validator(classifier);
-//			
-//			mean += v.validateOnTestSet(testSet);
-//			
-//			newT = converter.convertStringToInteger(t);
-//		}
-//		System.out.println("Mean error over 100 samples: "
-//				+ (1-(mean/100.0)));
-//
-//		int[][] confusion = v.computeConfusionMatrix(testSet);
-//
-//		printConfusion(confusion, testSet.getClasses());
+		Trainingset<Integer> testSet = null;
+		Validator v = null;
+		double mean = 0;
+		
+		for (int i = 0; i < 100; i++) {
+			YUSoMean classifier = new YUSoMean(Integer.valueOf(kString));
+
+			testSet = newT.splitUpTestSet(33);
+
+			classifier.learn(newT);
+
+			v = new Validator(classifier);
+			
+			mean += v.validateOnTestSet(testSet);
+			
+			newT = converter.convertStringToInteger(t);
+		}
+		System.out.println("Mean error over 100 samples: "
+				+ (1-(mean/100.0)));
+
+		int[][] confusion = v.computeConfusionMatrix(testSet);
+
+		printConfusion(confusion, testSet.getClasses());
 
 	}
 

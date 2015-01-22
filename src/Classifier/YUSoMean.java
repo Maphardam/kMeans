@@ -9,26 +9,44 @@ import java.util.Random;
 public class YUSoMean implements IClassifier{
 
 	private int k;
-	//TODO maybe there is a way to store centroids as an array, not an arraylist
 	private ArrayList<Instance<Double>> centroids;
+	private ArrayList<String> classifications;
+	
+	//contains class names
+	private ArrayList<String> classes;
 	
 	public YUSoMean(){
-		k = 3;
+		k = 4;
 		centroids = new ArrayList<Instance<Double>>();
+		classifications = new ArrayList<String>();
 	}
 	
 	public YUSoMean(int _k){
 		k = _k;
 		centroids = new ArrayList<Instance<Double>>();
+		classifications = new ArrayList<String>();
 	}
 	
 	@Override
 	public String classify(Instance<Integer> i) {
-		// TODO Auto-generated method stub
-		return null;
+		// find nearest centroid
+		// compute distance to centroids
+		double minDistance = Double.MAX_VALUE;
+		int assignedCentroid = -1;
+		for (int cIndex = 0; cIndex < centroids.size(); cIndex++) {
+			double dist = distance(centroids.get(cIndex), i);
+			if (dist < minDistance) {
+				minDistance = dist;
+				assignedCentroid = cIndex;
+			}
+		}
+			
+		return classifications.get(assignedCentroid);
 	}
 	
 	public void learn(Trainingset<Integer> t){
+		this.classes = t.getClasses();
+		
 		initializeCentroids(t);
 		
 //		System.out.println("Instances: ");
@@ -87,6 +105,26 @@ public class YUSoMean implements IClassifier{
 			
 			//System.out.println("Classification: " + Arrays.toString(newClassification));
 		} while (!Arrays.equals(oldClassification, newClassification));
+		
+		// get the classification of this cluster
+		// we use the class of the majority of instances in the cluster
+		
+		for (int cIndex = 0; cIndex < k; cIndex++) {
+			
+			//get the indexes of elements assigned to class i
+			ArrayList<Integer> indexes = new ArrayList<Integer>();
+			for (int iIndex = 0; iIndex < t.size(); iIndex++){
+				if (newClassification[iIndex] == cIndex)
+					indexes.add(iIndex);
+			}
+			
+			int[] classCount = new int[k];
+			for (int iocIndex : indexes) {
+				classCount[classes.indexOf(t.getInstance(iocIndex).getClassification())]++;
+			}
+			List<Integer> classCountArray = Arrays.asList(toObject(classCount));
+			classifications.add(classes.get(classCountArray.indexOf(Collections.max(classCountArray))));
+		}
 	}
 
 	private void initializeCentroids(Trainingset<Integer> t){
@@ -108,5 +146,14 @@ public class YUSoMean implements IClassifier{
 			distance += Math.abs(centroid.getFeature(m) - i.getFeature(m));
 		}
 		return distance;
+	}
+	
+	private static Integer[] toObject(int[] intArray) {
+		 
+		Integer[] result = new Integer[intArray.length];
+		for (int i = 0; i < intArray.length; i++) {
+			result[i] = Integer.valueOf(intArray[i]);
+		}
+		return result;
 	}
 }

@@ -1,0 +1,30 @@
+KMeans
+---------------------------------------------------------------------------------
+
+Format of Confusion Matrix:
+
+			|	classified class 1	|	classified class 2	|
+real class 1	|		1		|		0		|
+real class 2	|		0		|		1		|
+
+---------------------------------------------------------------------------------
+
+k = 4
+Mean error over 100 samples: 0.29680701754385996
+	     | 	unacc| 	acc	 | 	good | 	vgood| 	
+unacc  	 | 	362	 | 	44	 | 	0	 | 	0	 | 	
+acc  	 | 	73	 | 	48	 | 	0	 | 	0	 | 	
+good  	 | 	12	 | 	11	 | 	0	 | 	0	 | 	
+vgood  	 | 	11	 | 	9	 | 	0	 | 	0	 |
+
+with the underlying clusters: 
+(clusterX[0] == number of elements of class 'unacc'; clusterX[1] == 'acc'; ...)
+cluster 1: [308, 59, 2, 4]
+cluster 2: [197, 77, 4, 7]
+cluster 3: [217, 30, 13, 8]
+cluster 4: [82, 97, 27, 26]
+
+Most elements in the car data have the class 'unacc'. Therefore the most clusters are assigned to class 'unacc'
+and the performance decreases extremly.
+
+Naive Bayes and kNearestNeighbor outperform kMeans by far.
